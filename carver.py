@@ -1,70 +1,47 @@
 import sys
+import argparse
 
 from tqdm import trange
 import numpy as np
 from imageio import imread, imwrite
 from scipy.ndimage.filters import convolve
+import cv2 as cv
 
-def calc_energy(img):
+
+
+def e1(img):
     filter_du = np.array([
-        [1.0, 2.0, 1.0],
-        [0.0, 0.0, 0.0],
         [-1.0, -2.0, -1.0],
+        [0.0, 0.0, 0.0],
+        [1.0, 2.0, 1.0],
     ])
-    # This converts it from a 2D filter to a 3D filter, replicating the same
-    # filter for each channel: R, G, B
-    filter_du = np.stack([filter_du] * 3, axis=2)
 
     filter_dv = np.array([
-        [1.0, 0.0, -1.0],
-        [2.0, 0.0, -2.0],
-        [1.0, 0.0, -1.0],
+        [-1.0, 0.0, 1.0],
+        [-2.0, 0.0, 2.0],
+        [-1.0, 0.0, 1.0],
     ])
-    # This converts it from a 2D filter to a 3D filter, replicating the same
-    # filter for each channel: R, G, B
-    filter_dv = np.stack([filter_dv] * 3, axis=2)
 
+    img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img = img.astype('float32')
     convolved = np.absolute(convolve(img, filter_du)) + np.absolute(convolve(img, filter_dv))
 
-    # We sum the energies in the red, green, and blue channels
-    energy_map = convolved.sum(axis=2)
+    return convolved
 
-    return energy_map
+def e1_opencv(img):
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-def crop_c(img, scale_c):
-    r, c, _ = img.shape
-    new_c = int(scale_c * c)
+    grads_x = cv.Sobel(gray, cv.CV_64F, 1, 0, ksize=3)
+    grads_y = cv.Sobel(gray, cv.CV_64F, 0, 1, ksize=3)
 
-    for i in trange(c - new_c):
-        img = carve_column(img)
+    grads = np.absolute(grads_x) + np.absolute(grads_y)
 
-    return img
+    return grads
 
-def crop_r(img, scale_r):
-    img = np.rot90(img, 1, (0, 1))
-    img = crop_c(img, scale_r)
-    img = np.rot90(img, 3, (0, 1))
-    return img
-
-def carve_column(img):
-    r, c, _ = img.shape
-
-    M, backtrack = minimum_seam(img)
-    mask = np.ones((r, c), dtype=np.bool)
-
-    j = np.argmin(M[-1])
-    for i in reversed(range(r)):
-        mask[i, j] = False
-        j = backtrack[i, j]
-
-    mask = np.stack([mask] * 3, axis=2)
-    img = img[mask].reshape((r, c - 1, 3))
-    return img
 
 def minimum_seam(img):
     r, c, _ = img.shape
-    energy_map = calc_energy(img)
+    energy_map = e1_opencv(img)
 
     M = energy_map.copy()
     backtrack = np.zeros_like(M, dtype=np.int)
@@ -85,15 +62,58 @@ def minimum_seam(img):
 
     return M, backtrack
 
-def main():
-    if len(sys.argv) != 5:
-        print('usage: carver.py <r/c> <scale> <image_in> <image_out>', file=sys.stderr)
-        sys.exit(1)
 
-    which_axis = sys.argv[1]
-    scale = float(sys.argv[2])
-    in_filename = sys.argv[3]
-    out_filename = sys.argv[4]
+def carve_column(img):
+    r, c, _ = img.shape
+
+    M, backtrack = minimum_seam(img)
+    mask = np.ones((r, c), dtype=np.bool)
+
+    j = np.argmin(M[-1])
+    for i in reversed(range(r)):
+        mask[i, j] = False
+        j = backtrack[i, j]
+
+    mask = np.stack([mask] * 3, axis=2)
+    img = img[mask].reshape((r, c - 1, 3))
+    return img
+
+
+def crop_c(img, scale_c):
+    r, c, _ = img.shape
+    new_c = int(scale_c * c)
+
+    for i in trange(c - new_c):
+        img = carve_column(img)
+
+    return img
+
+def crop_r(img, scale_r):
+    img = np.rot90(img, 1, (0, 1))
+    img = crop_c(img, scale_r)
+    img = np.rot90(img, 3, (0, 1))
+    return img
+
+
+
+
+
+
+def opts_parser():
+    p = argparse.ArgumentParser()
+    p.add_argument('axis', choices=['r', 'c'], help='resize in rows(r) or columns(c)')
+    p.add_argument('scale', type=float, help='resize scale')
+    p.add_argument('src', help='path to source image')
+    p.add_argument('--des', default='res.jpg', help='where to store the resized image')
+    return p.parse_args()
+
+def main():
+    opts = opts_parser()
+
+    which_axis = opts.axis
+    scale = opts.scale
+    in_filename = opts.src
+    out_filename = opts.des
 
     img = imread(in_filename)
 
@@ -101,11 +121,21 @@ def main():
         out = crop_r(img, scale)
     elif which_axis == 'c':
         out = crop_c(img, scale)
-    else:
-        print('usage: carver.py <r/c> <scale> <image_in> <image_out>', file=sys.stderr)
-        sys.exit(1)
     
     imwrite(out_filename, out)
 
+
+
+
+
+
 if __name__ == '__main__':
-    main()
+    # main()
+
+    import time
+    img = cv.imread('star.jpg')
+
+    start = time.time()
+    for i in range(100):
+        tmp = e1_opencv(img)
+    print(f"{time.time() - start}")
