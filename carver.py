@@ -1,9 +1,4 @@
-import sys
-import argparse
-
-from tqdm import trange
 import numpy as np
-from imageio import imread, imwrite
 from scipy.ndimage.filters import convolve
 import cv2 as cv
 
@@ -24,9 +19,11 @@ def e1(img):
 
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img = img.astype('float32')
-    convolved = np.absolute(convolve(img, filter_du)) + np.absolute(convolve(img, filter_dv))
+    grads = np.absolute(convolve(img, filter_du)) + np.absolute(convolve(img, filter_dv))
 
-    return convolved
+    return grads
+
+
 
 def e1_opencv(img):
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -39,28 +36,36 @@ def e1_opencv(img):
     return grads
 
 
+
 def minimum_seam(img):
     r, c, _ = img.shape
     energy_map = e1_opencv(img)
 
-    M = energy_map.copy()
+    M = energy_map
     backtrack = np.zeros_like(M, dtype=np.int)
 
     for i in range(1, r):
-        for j in range(0, c):
-            # Handle the left edge of the image, to ensure we don't index a -1
-            if j == 0:
-                idx = np.argmin(M[i-1, j:j + 2])
-                backtrack[i, j] = idx + j
-                min_energy = M[i-1, idx + j]
-            else:
-                idx = np.argmin(M[i - 1, j - 1:j + 2])
-                backtrack[i, j] = idx + j - 1
-                min_energy = M[i - 1, idx + j - 1]
+        pre_i = i - 1
 
-            M[i, j] += min_energy
+        for j in range(0, c):
+            if j == 0:
+                idx = np.argmin(M[pre_i, j:j+2])
+                absolute_idx = idx + j
+
+            elif j == c - 1:
+                idx = np.argmin(M[pre_i, j-1:j+1])
+                absolute_idx = idx + j - 1
+
+            else:
+                idx = np.argmin(M[i - 1, j-1:j+2])
+                absolute_idx = idx + j - 1
+
+            backtrack[i, j] = absolute_idx
+            M[i, j] += M[pre_i, absolute_idx]
 
     return M, backtrack
+
+
 
 
 def carve_column(img):
@@ -79,63 +84,18 @@ def carve_column(img):
     return img
 
 
-def crop_c(img, scale_c):
-    r, c, _ = img.shape
-    new_c = int(scale_c * c)
-
-    for i in trange(c - new_c):
-        img = carve_column(img)
-
-    return img
-
-def crop_r(img, scale_r):
-    img = np.rot90(img, 1, (0, 1))
-    img = crop_c(img, scale_r)
-    img = np.rot90(img, 3, (0, 1))
-    return img
-
-
-
-
-
-
-def opts_parser():
-    p = argparse.ArgumentParser()
-    p.add_argument('axis', choices=['r', 'c'], help='resize in rows(r) or columns(c)')
-    p.add_argument('scale', type=float, help='resize scale')
-    p.add_argument('src', help='path to source image')
-    p.add_argument('--des', default='res.jpg', help='where to store the resized image')
-    return p.parse_args()
-
-def main():
-    opts = opts_parser()
-
-    which_axis = opts.axis
-    scale = opts.scale
-    in_filename = opts.src
-    out_filename = opts.des
-
-    img = imread(in_filename)
-
-    if which_axis == 'r':
-        out = crop_r(img, scale)
-    elif which_axis == 'c':
-        out = crop_c(img, scale)
-    
-    imwrite(out_filename, out)
-
 
 
 
 
 
 if __name__ == '__main__':
-    # main()
 
     import time
-    img = cv.imread('star.jpg')
+    img = cv.imread('./images/lena.jpg')
 
     start = time.time()
     for i in range(100):
-        tmp = e1_opencv(img)
+        carve_column(img)
     print(f"{time.time() - start}")
+
