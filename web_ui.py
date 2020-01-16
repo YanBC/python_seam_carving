@@ -73,5 +73,5 @@ if __name__ == '__main__':
 
     app.config['ENV'] = 'development'
     app.config['MAX_CONTENT_LENGTH'] = 124 * 1024 * 1024
-    app.run(host='', port=13456)
+    app.run(host='', port=10800)
 
