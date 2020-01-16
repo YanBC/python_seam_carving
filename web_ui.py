@@ -63,6 +63,10 @@ def show_file(filename):
     return send_from_directory(app.config['IMAGE_FOLDER'], filename)
 
 
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 if __name__ == '__main__':
@@ -71,7 +75,7 @@ if __name__ == '__main__':
     if not os.path.isdir(app.config['IMAGE_FOLDER']):
         os.mkdir(app.config['IMAGE_FOLDER'])
 
-    app.config['ENV'] = 'development'
+    # app.config['ENV'] = 'development'
     app.config['MAX_CONTENT_LENGTH'] = 124 * 1024 * 1024
     app.run(host='', port=10800)
 
