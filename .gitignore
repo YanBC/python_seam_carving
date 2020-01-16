@@ -185,3 +185,8 @@ references.txt
 carver/*.c
 carver/*.html
 carver/test.py
+*/__init__.py
+references/
+pyvenv/
+uploads/
+results/
