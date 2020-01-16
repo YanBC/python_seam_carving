@@ -40,7 +40,7 @@ def e1_opencv(img):
 def minimum_seam(img):
     cdef int i, j, idx, absolute_idx, pre_i
     cdef int r, c
-    
+
     r, c, _ = img.shape
     energy_map = e1_opencv(img)
 
@@ -72,13 +72,13 @@ def minimum_seam(img):
 
 
 def carve_column(img):
+    cdef int i, j, r, c
+
     r, c, _ = img.shape
 
     M, backtrack = minimum_seam(img)
     mask = np.ones((r, c), dtype=np.bool)
 
-    cdef int i
-    cdef int j
     j = np.argmin(M[-1])
     for i in reversed(range(r)):
         mask[i, j] = False
