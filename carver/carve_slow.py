@@ -87,15 +87,3 @@ def carve_column(img):
 
 
 
-
-
-if __name__ == '__main__':
-
-    import time
-    img = cv.imread('./images/lena.jpg')
-
-    start = time.time()
-    for i in range(100):
-        carve_column(img)
-    print(f"{time.time() - start}")
-

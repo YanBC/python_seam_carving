@@ -182,3 +182,6 @@ $RECYCLE.BIN/
 *.jpg
 *.pdf
 references.txt
+carver/*.c
+carver/*.html
+carver/test.py
