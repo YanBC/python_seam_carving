@@ -4,13 +4,15 @@ from cv2 import resize as imresize
 from imageio import imread, imwrite
 
 
-try:
-    from carver.carve_fast import carve_column
-except ModuleNotFoundError:
-    from carver.carve_slow import carve_column
-    print('#@@@@@@@@@@@@@@@@@@@#')
-    print('Using slow version seam carving')
-    print('#@@@@@@@@@@@@@@@@@@@#')
+# try:
+#     from carver.carve_fast import carve_column
+# except ModuleNotFoundError:
+#     from carver.carve_slow import carve_column
+#     print('#@@@@@@@@@@@@@@@@@@@#')
+#     print('Using slow version seam carving')
+#     print('#@@@@@@@@@@@@@@@@@@@#')
+
+from carver.carve_numba import carve_column
 
 
 

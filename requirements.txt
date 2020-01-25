@@ -3,3 +3,4 @@ imageio
 Flask
 scipy
 Cython
+numba
