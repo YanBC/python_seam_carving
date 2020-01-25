@@ -4,6 +4,7 @@ from flask import send_from_directory
 import os
 from werkzeug.utils import secure_filename
 from imageio import imread, imwrite
+import argparse
 
 from cml_ui import Engine
 
@@ -18,8 +19,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['IMAGE_FOLDER'] = IMAGE_FOLDER
 
 carver = Engine()
-
-
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -56,8 +55,6 @@ def upload_file():
     return render_template('upload.html')
 
 
-
-
 @app.route('/images/<filename>')
 def show_file(filename):
     return send_from_directory(app.config['IMAGE_FOLDER'], filename)
@@ -69,7 +66,16 @@ def favicon():
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
+def parser():
+    p = argparse.ArgumentParser()
+    p.add_argument('--ip', default='', help='ip address. Default to wild card')
+    p.add_argument('--port', default=10800, type=int, help='port number. Default to 10800')
+    args = p.parse_args()
+    return args
+
 if __name__ == '__main__':
+    opts = parser()
+
     if not os.path.isdir(app.config['UPLOAD_FOLDER']):
         os.mkdir(app.config['UPLOAD_FOLDER'])
     if not os.path.isdir(app.config['IMAGE_FOLDER']):
@@ -77,5 +83,5 @@ if __name__ == '__main__':
 
     # app.config['ENV'] = 'development'
     app.config['MAX_CONTENT_LENGTH'] = 124 * 1024 * 1024
-    app.run(host='', port=10800)
+    app.run(host=opts.ip, port=opts.port)
 
