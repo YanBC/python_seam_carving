@@ -21,9 +21,10 @@ RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install -r requirements.txt
 
 RUN useradd -m -s /bin/bash -u $USERID -G sudo carver && \
-    echo "carver:carver" | chpasswd && \
-    chown carver:carver -R /seam_carving
-
-USER carver
+    echo "carver:carver" | chpasswd
 
 COPY . .
+
+RUN chown carver:carver -R /seam_carving
+USER carver
+CMD ["python", "web_ui.py"]

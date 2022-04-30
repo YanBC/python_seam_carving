@@ -4,13 +4,15 @@ USERID=`id -u`
 VERSION=`git rev-parse --short HEAD`
 
 function build() {
-    docker build -t seam_carving:$VERSION --build-arg USERID=$USERID .
+    docker build -t seam_carving:$VERSION --build-arg USERID=$USERID \
+        .
     docker tag seam_carving:$VERSION seam_carving:latest
 }
 
 function build_zh() {
-    docker build -t seam_carving_zh:$VERSION --build-arg USERID=$USERID -f CN.Dockerfile .
-    docker tag seam_carving_zh:$VERSION seam_carving_zh:latest
+    docker build -t seam_carving:$VERSION --build-arg USERID=$USERID \
+        -f CN.Dockerfile .
+    docker tag seam_carving:$VERSION seam_carving:latest
 }
 
 function clear() {

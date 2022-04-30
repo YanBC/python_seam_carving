@@ -29,6 +29,5 @@ docker run --init -d --rm \
     -v /etc/localtime:/etc/localtime:ro \
     -v /etc/timezone:/etc/timezone:ro \
     -p 10800:10800 \
-    seam_carving:latest \
-    python web_ui.py
+    seam_carving:latest
 ```

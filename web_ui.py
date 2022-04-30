@@ -10,7 +10,8 @@ from cml_ui import Engine
 
 
 
-
+DEFAULT_ADDR = os.environ['HOSTNAME']
+DEFAULT_PORT = 10800
 UPLOAD_FOLDER = './uploads'
 IMAGE_FOLDER = './results'
 
@@ -68,8 +69,8 @@ def favicon():
 
 def parser():
     p = argparse.ArgumentParser()
-    p.add_argument('--ip', default='', help='ip address. Default to wild card')
-    p.add_argument('--port', default=10800, type=int, help='port number. Default to 10800')
+    p.add_argument('--ip', default=DEFAULT_ADDR, help='ip address')
+    p.add_argument('--port', default=DEFAULT_PORT, type=int, help=f'port number. Default to {DEFAULT_PORT}')
     args = p.parse_args()
     return args
 
@@ -84,4 +85,3 @@ if __name__ == '__main__':
     # app.config['ENV'] = 'development'
     app.config['MAX_CONTENT_LENGTH'] = 124 * 1024 * 1024
     app.run(host=opts.ip, port=opts.port)
-
