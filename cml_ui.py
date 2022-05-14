@@ -1,20 +1,14 @@
 import numpy as np
 import argparse
-from cv2 import resize as imresize
-from imageio import imread, imwrite
-
-
-# try:
-#     from carver.carve_fast import carve_column
-# except ModuleNotFoundError:
-#     from carver.carve_slow import carve_column
-#     print('#@@@@@@@@@@@@@@@@@@@#')
-#     print('Using slow version seam carving')
-#     print('#@@@@@@@@@@@@@@@@@@@#')
-
-from carver.carve_numba import carve_column
-
-
+import cv2 as cv
+try:
+    from carver.carve_numba import carve_column
+except ModuleNotFoundError as e:
+    print('#@@@@@@@@@@@@@@@@@@@#')
+    print(e)
+    print('Using slow cpu version seam carving')
+    print('#@@@@@@@@@@@@@@@@@@@#')
+    from carver.carve_slow import carve_column
 
 
 class Engine():
@@ -36,7 +30,6 @@ class Engine():
         img = np.rot90(img, 3, (0, 1))
         return img
 
-
     def run(self, img, target_width, target_height):
         if target_width > self.MAX_WIDTH or target_height > self.MAX_HEIGHT:
             print(f'target height and width must be less than {self.MAX_HEIGHT} and {self.MAX_WIDTH} respectively')
@@ -47,7 +40,7 @@ class Engine():
         scale_w = target_width / img_w
         scale = max(scale_h, scale_w)
 
-        img_scaled = imresize(img, (0,0), fx=scale, fy=scale)
+        img_scaled = cv.resize(img, (0,0), fx=scale, fy=scale)
         rows_tobe_carved = img_scaled.shape[0] - target_height
         cols_tobe_carved = img_scaled.shape[1] - target_width
 
@@ -57,42 +50,41 @@ class Engine():
         return out
 
 
-
-
-
 def opts_parser():
     p = argparse.ArgumentParser()
     p.add_argument('src', help='path to source image')
-    p.add_argument('width', type=int, help='target width to be converted into')
-    p.add_argument('height', type=int, help='target height to be converted into')
+    p.add_argument('-c', '--col', type=int, help='target width to be converted into')
+    p.add_argument('-r', '--row', type=int, help='target height to be converted into')
     p.add_argument('--des', default='res.jpg', help='where to store the resized image')
     return p.parse_args()
-
 
 
 def main():
     opts = opts_parser()
 
-    target_width = opts.width
-    target_height = opts.height
+    target_width = opts.col
+    target_height = opts.row
     in_filename = opts.src
     out_filename = opts.des
 
+    img = cv.imread(in_filename)
+    assert img is not None, f'Failed to read image {in_filename}'
+    if target_width is None or target_height is None:
+        print(f"image {in_filename} has shape {img.shape}")
+        print('Please specify target height (-r) and width (-c)')
+        return
+
     carving_engine = Engine()
-
-    img = imread(in_filename)
-
     out = carving_engine.run(img, target_width, target_height)
-    
+
     if out is not None:
-        imwrite(out_filename, out)
+        cv.imwrite(out_filename, out)
     else:
         return
 
 
 if __name__ == '__main__':
-    import time
-
-    start = time.time()
+    # import time
+    # start = time.time()
     main()
-    print(time.time() - start)
+    # print(time.time() - start)

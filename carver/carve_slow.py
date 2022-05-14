@@ -1,10 +1,9 @@
 import numpy as np
-from scipy.ndimage.filters import convolve
 import cv2 as cv
 
 
-
-def e1(img):
+def backward_energy(img):
+    from scipy.ndimage.filters import convolve
     filter_du = np.array([
         [-1.0, -2.0, -1.0],
         [0.0, 0.0, 0.0],
@@ -24,8 +23,7 @@ def e1(img):
     return grads
 
 
-
-def e1_opencv(img):
+def backward_energy_opencv(img):
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
     grads_x = cv.Sobel(gray, cv.CV_64F, 1, 0, ksize=3)
@@ -36,12 +34,10 @@ def e1_opencv(img):
     return grads
 
 
-
 def minimum_seam(img):
     r, c, _ = img.shape
-    energy_map = e1_opencv(img)
+    M = backward_energy_opencv(img)
 
-    M = energy_map
     backtrack = np.zeros_like(M, dtype=np.int)
 
     for i in range(1, r):
@@ -66,8 +62,6 @@ def minimum_seam(img):
     return M, backtrack
 
 
-
-
 def carve_column(img):
     r, c, _ = img.shape
 
@@ -82,8 +76,3 @@ def carve_column(img):
     mask = np.stack([mask] * 3, axis=2)
     img = img[mask].reshape((r, c - 1, 3))
     return img
-
-
-
-
-

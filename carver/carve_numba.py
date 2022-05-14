@@ -10,20 +10,20 @@ def forward_energy(im):
 
     energy = np.zeros((h, w))
     m = np.zeros((h, w))
-    
+
     U = np.roll(im, 1, axis=0)
     L = np.roll(im, 1, axis=1)
     R = np.roll(im, -1, axis=1)
-    
+
     cU = np.abs(R - L)
     cL = np.abs(U - L) + cU
     cR = np.abs(U - R) + cU
-    
+
     for i in range(1, h):
         mU = m[i-1]
         mL = np.roll(mU, 1)
         mR = np.roll(mU, -1)
-        
+
         mULR = np.array([mU, mL, mR])
         cULR = np.array([cU[i], cL[i], cR[i]])
         mULR += cULR
@@ -31,7 +31,7 @@ def forward_energy(im):
         argmins = np.argmin(mULR, axis=0)
         m[i] = np.choose(argmins, mULR)
         energy[i] = np.choose(argmins, cULR)
-    
+
     return energy
 
 
@@ -49,36 +49,36 @@ def backward_energy(im):
 @jit
 def get_minimum_seam(im):
     h, w = im.shape[:2]
-    # energyfn = forward_energy if USE_FORWARD_ENERGY else backward_energy
     M = forward_energy(im)
 
     backtrack = np.zeros_like(M, dtype=np.int)
 
     # populate DP matrix
-    for i in range(1, h):
-        for j in range(0, w):
-            if j == 0:
-                idx = np.argmin(M[i - 1, j:j + 2])
-                backtrack[i, j] = idx + j
-                min_energy = M[i-1, idx + j]
+    for row in range(1, h):
+        for col in range(0, w):
+            if col == 0:
+                idx = np.argmin(M[row - 1, col:col + 2])
+                backtrack[row, col] = idx + col
+                min_energy = M[row-1, idx + col]
             else:
-                idx = np.argmin(M[i - 1, j - 1:j + 2])
-                backtrack[i, j] = idx + j - 1
-                min_energy = M[i - 1, idx + j - 1]
+                idx = np.argmin(M[row - 1, col - 1:col + 2])
+                backtrack[row, col] = idx + col - 1
+                min_energy = M[row - 1, idx + col - 1]
 
-            M[i, j] += min_energy
+            M[row, col] += min_energy
 
     # backtrack to find path
     seam_idx = []
     boolmask = np.ones((h, w), dtype=np.bool)
-    j = np.argmin(M[-1])
-    for i in range(h-1, -1, -1):
-        boolmask[i, j] = False
-        seam_idx.append(j)
-        j = backtrack[i, j]
+    col = np.argmin(M[-1])
+    for row in range(h-1, -1, -1):
+        boolmask[row, col] = False
+        seam_idx.append(col)
+        col = backtrack[row, col]
 
     seam_idx.reverse()
     return np.array(seam_idx), boolmask
+
 
 @jit
 def remove_seam(im, boolmask):
@@ -89,10 +89,7 @@ def remove_seam(im, boolmask):
 
 def carve_column(im):
     seam_idx, boolmask = get_minimum_seam(im)
-    
+
     im = remove_seam(im, boolmask)
 
     return im
-
-
-
