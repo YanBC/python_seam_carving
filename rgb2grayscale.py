@@ -1,4 +1,3 @@
-
 import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 import numpy as np
@@ -6,8 +5,6 @@ import cv2 as cv
 
 
 cuda.init()
-
-
 device = cuda.Device(0)
 cuda_ctx = device.make_context()
 stream = cuda.Stream()
@@ -19,7 +16,7 @@ try:
             // printf("%d, %d\\n", width, height);
             int des_x = blockIdx.x * blockDim.x + threadIdx.x;
             int des_y = blockIdx.y * blockDim.y + threadIdx.y;
-            if (des_x >= int(width) || des_y >= int(height))
+            if (des_x >= width || des_y >= height)
                 return;
             int des_id = des_y * width + des_x;
             int src_r_id = des_id * 3;
@@ -52,8 +49,11 @@ try:
     cuda.memcpy_dtoh_async(arr_out, arr_out_gpu, stream=stream)
 
     stream.synchronize()
-
     arr_out = arr_out.astype(np.uint8)
+
+    # opencv_out = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    # print(arr_out.astype(np.float32) - opencv_out.astype(np.float32))
+
     cv.imwrite("./images/rem_gray.jpeg", arr_out)
 
 finally:
