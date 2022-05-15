@@ -112,8 +112,9 @@ try:
     sobel_abs = mod.get_function("sobel_abs")
 
     np.random.seed(0)
-    image = np.random.randint(0, 255, (500, 500))
-    image_h, image_w = image.shape[:2]
+    image_h = 500
+    image_w = 500
+    image = np.random.randint(0, 255, (image_h, image_w))
     block_x = 32
     block_y = 32
 

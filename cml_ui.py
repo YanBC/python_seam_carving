@@ -1,14 +1,24 @@
 import numpy as np
 import argparse
 import cv2 as cv
+
+USE_GPU = True
 try:
-    from carver.carve_numba import carve_column
+    from carver.carve_cuda import carve_column
 except ModuleNotFoundError as e:
     print('#@@@@@@@@@@@@@@@@@@@#')
     print(e)
-    print('Using slow cpu version seam carving')
+    print('Failed to import carve_cuda.py, using CPU instead')
     print('#@@@@@@@@@@@@@@@@@@@#')
-    from carver.carve_slow import carve_column
+    USE_GPU = False
+if not USE_GPU:
+    try:
+        from carver.carve_numba import carve_column
+    except ModuleNotFoundError as e:
+        print(e)
+        print('Using slow cpu version seam carving')
+        print('#@@@@@@@@@@@@@@@@@@@#')
+        from carver.carve_slow import carve_column
 
 
 class Engine():
@@ -75,7 +85,9 @@ def main():
         return
 
     carving_engine = Engine()
-    out = carving_engine.run(img, target_width, target_height)
+    for t in range(100):
+        # print(t)
+        out = carving_engine.run(img, target_width, target_height)
 
     if out is not None:
         cv.imwrite(out_filename, out)
