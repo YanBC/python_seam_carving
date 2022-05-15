@@ -57,15 +57,18 @@ def get_minimum_seam(im):
     for row in range(1, h):
         for col in range(0, w):
             if col == 0:
-                idx = np.argmin(M[row - 1, col:col + 2])
-                backtrack[row, col] = idx + col
-                min_energy = M[row-1, idx + col]
-            else:
-                idx = np.argmin(M[row - 1, col - 1:col + 2])
-                backtrack[row, col] = idx + col - 1
-                min_energy = M[row - 1, idx + col - 1]
+                idx = np.argmin(M[row-1, col:col+3])
+                absolute_idx = idx + col
 
-            M[row, col] += min_energy
+            elif col == w - 1:
+                idx = np.argmin(M[row-1, col-2:col+1])
+                absolute_idx = idx + col - 2
+
+            else:
+                idx = np.argmin(M[row-1, col-1:col+2])
+                absolute_idx = idx + col - 1
+            backtrack[row, col] = absolute_idx
+            M[row, col] += M[row-1, absolute_idx]
 
     # backtrack to find path
     seam_idx = []

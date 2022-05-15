@@ -34,9 +34,9 @@ def backward_energy_opencv(img):
     return grads
 
 
-def minimum_seam(img):
-    r, c, _ = img.shape
-    M = backward_energy_opencv(img)
+def minimum_seam(energy):
+    r, c = energy.shape
+    M = energy.copy()
 
     backtrack = np.zeros_like(M, dtype=np.int)
 
@@ -45,15 +45,15 @@ def minimum_seam(img):
 
         for j in range(0, c):
             if j == 0:
-                idx = np.argmin(M[pre_i, j:j+2])
+                idx = np.argmin(M[pre_i, j:j+3])
                 absolute_idx = idx + j
 
             elif j == c - 1:
-                idx = np.argmin(M[pre_i, j-1:j+1])
-                absolute_idx = idx + j - 1
+                idx = np.argmin(M[pre_i, j-2:j+1])
+                absolute_idx = idx + j - 2
 
             else:
-                idx = np.argmin(M[i - 1, j-1:j+2])
+                idx = np.argmin(M[pre_i, j-1:j+2])
                 absolute_idx = idx + j - 1
 
             backtrack[i, j] = absolute_idx
@@ -65,7 +65,8 @@ def minimum_seam(img):
 def carve_column(img):
     r, c, _ = img.shape
 
-    M, backtrack = minimum_seam(img)
+    energy = backward_energy_opencv(img)
+    M, backtrack = minimum_seam(energy)
     mask = np.ones((r, c), dtype=np.bool)
 
     j = np.argmin(M[-1])
