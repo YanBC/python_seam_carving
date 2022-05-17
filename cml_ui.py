@@ -85,9 +85,7 @@ def main():
         return
 
     carving_engine = Engine()
-    for t in range(100):
-        # print(t)
-        out = carving_engine.run(img, target_width, target_height)
+    out = carving_engine.run(img, target_width, target_height)
 
     if out is not None:
         cv.imwrite(out_filename, out)
