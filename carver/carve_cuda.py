@@ -190,9 +190,10 @@ def minimum_seam(image:np.ndarray, width:int, height:int) -> Tuple[np.ndarray, i
 
 
 def carve_column(img):
-    r, c = img.shape[0:2]
+    image = np.ascontiguousarray(img)
+    r, c = image.shape[0:2]
 
-    backtrack_m, min_index = minimum_seam(img, c, r)
+    backtrack_m, min_index = minimum_seam(image, c, r)
     mask = np.ones((r, c), dtype=np.bool)
 
     j = min_index
@@ -201,5 +202,5 @@ def carve_column(img):
         j = backtrack_m[i, j]
 
     mask = np.stack([mask] * 3, axis=2)
-    img = img[mask].reshape((r, c - 1, 3))
-    return img
+    image = image[mask].reshape((r, c - 1, 3))
+    return image

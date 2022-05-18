@@ -3,11 +3,10 @@ from flask import redirect, url_for, flash
 from flask import send_from_directory
 import os
 from werkzeug.utils import secure_filename
-from imageio import imread, imwrite
 import argparse
+import cv2 as cv
 
 from cml_ui import Engine
-
 
 
 DEFAULT_ADDR = os.environ['HOSTNAME']
@@ -41,13 +40,13 @@ def upload_file():
 
         target_width = int(request.form['width'])
         target_height = int(request.form['height'])
-        image = imread(srcPath)
+        image = cv.imread(srcPath)
 
         output = carver.run(image, target_width, target_height)
 
         if output is not None:
             desPath = os.path.join(app.config['IMAGE_FOLDER'], filename)
-            imwrite(desPath, output)
+            cv.imwrite(desPath, output)
             return redirect(url_for('show_file', filename=filename))
         else:
             return "Sorry, something went wrong"
@@ -73,6 +72,7 @@ def parser():
     p.add_argument('--port', default=DEFAULT_PORT, type=int, help=f'port number. Default to {DEFAULT_PORT}')
     args = p.parse_args()
     return args
+
 
 if __name__ == '__main__':
     opts = parser()
