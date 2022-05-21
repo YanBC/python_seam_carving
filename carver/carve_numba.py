@@ -96,3 +96,11 @@ def carve_column(im):
     im = remove_seam(im, boolmask)
 
     return im
+
+
+class Core:
+    def __init__(self) -> None:
+        pass
+
+    def carve_column(self, img:np.ndarray) -> np.ndarray:
+        return carve_column(img)

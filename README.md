@@ -14,7 +14,7 @@ python3 -m pip install pycuda
 python cml_ui.py -h
 ```
 
-for flask web app, simply run
+for the flask web app, simply run
 ```bash
 python web_ui.py
 ```
@@ -49,4 +49,37 @@ docker run --init -d --rm \
     -p 10800:10800 \
     --gpus all \
     seam_carving_cuda:latest
+```
+
+## Comparison of speed
+I use Linux `time` program to measure the time consumed. Each version is tested with the following command:
+
+```bash
+time python cml_ui.py images/rem.jpeg -r 400 -c 600
+```
+
+My hardware setup:
+- CPU: `AMD Ryzen 7 5800H (16-core)`
+- GPU: `NVIDIA GeForce RTX 3080 Ti`
+
+
+### CPU slow
+```
+real    0m42.481s
+user    0m45.133s
+sys     0m4.929s
+```
+
+### CPU fast (numba)
+```
+real    0m10.509s
+user    0m14.076s
+sys     0m9.695s
+```
+
+### GPU (cuda)
+```
+real    0m1.763s
+user    0m1.702s
+sys     0m4.742s
 ```

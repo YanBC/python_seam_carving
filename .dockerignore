@@ -1,0 +1,7 @@
+*.jpg
+*.pdf
+references/
+pyvenv/
+uploads/
+results/
+.git

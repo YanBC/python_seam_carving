@@ -77,3 +77,11 @@ def carve_column(img):
     mask = np.stack([mask] * 3, axis=2)
     img = img[mask].reshape((r, c - 1, 3))
     return img
+
+
+class Core:
+    def __init__(self) -> None:
+        pass
+
+    def carve_column(self, img:np.ndarray) -> np.ndarray:
+        return carve_column(img)
