@@ -62,12 +62,11 @@ My hardware setup:
 - CPU: `AMD Ryzen 7 5800H (16-core)`
 - GPU: `NVIDIA GeForce RTX 3080 Ti`
 
-
-### CPU slow
+### GPU (cuda)
 ```
-real    0m42.481s
-user    0m45.133s
-sys     0m4.929s
+real    0m1.763s
+user    0m1.702s
+sys     0m4.742s
 ```
 
 ### CPU fast (numba)
@@ -77,9 +76,9 @@ user    0m14.076s
 sys     0m9.695s
 ```
 
-### GPU (cuda)
+### CPU slow
 ```
-real    0m1.763s
-user    0m1.702s
-sys     0m4.742s
+real    0m42.481s
+user    0m45.133s
+sys     0m4.929s
 ```
