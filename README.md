@@ -5,7 +5,7 @@ Seam Carving in python, and it comes with flask application! For further informa
 ```bash
 # for cpu version
 python3 -m pip install -r requirements.txt
-# additionally, for gpu version
+# additionally, for cuda version
 python3 -m pip install pycuda
 ```
 
@@ -24,37 +24,34 @@ and then go to `http://127.0.0.1:10800/` in your favorite browser
 ![this is how the webpage looks like](images/demo.png)
 
 
-## Using docker
-
-I have built two docker images for this project. You can just pull them from docker hub.
-- `yanbc/seam_carving_cpu:latest`: for cpu version
+## Using docker (recommended)
+For those of you who are familiar with docker, you can use the following docker images to run the web app.
 - `yanbc/seam_carving_cuda:latest`: for cuda version
+- `yanbc/seam_carving_cpu:latest`: for cpu version
 
-Or you can use the following commands to build the docker images:
-
-### cpu runtime image
 ```bash
-# make image
-bash make_image.sh build_cpu
-# start container
-docker run --init -d --rm \
-    -v /etc/localtime:/etc/localtime:ro \
-    -v /etc/timezone:/etc/timezone:ro \
-    -p 10800:10800 \
-    seam_carving_cpu:latest
-```
-
-### cuda runtime image
-```bash
-# make image
-bash make_image.sh build_cuda
-# start container
+# cuda version
 docker run --init -d --rm \
     -v /etc/localtime:/etc/localtime:ro \
     -v /etc/timezone:/etc/timezone:ro \
     -p 10800:10800 \
     --gpus all \
-    seam_carving_cuda:latest
+    yanbc/seam_carving_cuda:latest
+# cpu version
+docker run --init -d --rm \
+    -v /etc/localtime:/etc/localtime:ro \
+    -v /etc/timezone:/etc/timezone:ro \
+    -p 10800:10800 \
+    yanbc/seam_carving_cpu:latest
+```
+
+Or you can use the following commands to build the docker images:
+
+```bash
+# make cuda image
+bash make_image.sh build_cuda
+# make cpu image
+bash make_image.sh build_cpu
 ```
 
 ## Comparison of speed
@@ -68,6 +65,7 @@ My hardware setup:
 - CPU: `AMD Ryzen 7 5800H (16-core)`
 - GPU: `NVIDIA GeForce RTX 3080 Ti`
 
+Results:
 ### GPU (cuda)
 ```
 real    0m1.763s
