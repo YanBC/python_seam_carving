@@ -1,5 +1,5 @@
 FROM ubuntu:18.04
-ARG USERID
+ARG USERID=1000
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
