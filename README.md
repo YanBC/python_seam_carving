@@ -1,7 +1,7 @@
 # python seam-carving
 Seam Carving in python, and it comes with flask application! For further information on seam carving, please refer to the original paper [Seam Carving for Content-Aware Image Resizing](http://www.faculty.idc.ac.il/arik/SCWeb/imret/index.html)
 
-## requirements
+## Requirements
 ```bash
 # for cpu version
 python3 -m pip install -r requirements.txt
@@ -9,7 +9,7 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install pycuda
 ```
 
-## usage
+## Usage
 ```bash
 python cml_ui.py -h
 ```
@@ -24,24 +24,30 @@ and then go to `http://127.0.0.1:10800/` in your favorite browser
 ![this is how the webpage looks like](images/demo.png)
 
 
-## using docker
+## Using docker
+
+I have built two docker images for this project. You can just pull them from docker hub.
+- `yanbc/seam_carving_cpu:latest`: for cpu version
+- `yanbc/seam_carving_cuda:latest`: for cuda version
+
+Or you can use the following commands to build the docker images:
 
 ### cpu runtime image
 ```bash
 # make image
-bash make_image.sh build
+bash make_image.sh build_cpu
 # start container
 docker run --init -d --rm \
     -v /etc/localtime:/etc/localtime:ro \
     -v /etc/timezone:/etc/timezone:ro \
     -p 10800:10800 \
-    seam_carving:latest
+    seam_carving_cpu:latest
 ```
 
 ### cuda runtime image
 ```bash
 # make image
-bash make_image.sh build_gpu
+bash make_image.sh build_cuda
 # start container
 docker run --init -d --rm \
     -v /etc/localtime:/etc/localtime:ro \

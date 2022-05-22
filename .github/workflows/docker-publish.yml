@@ -1,0 +1,59 @@
+name: Docker
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  push:
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: docker.io
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Workaround: https://github.com/docker/build-push-action/issues/461
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push CUDA image
+        id: build-and-push-cuda
+        run: |
+          docker build -f cuda.Dockerfile -t yanbc/seam_carving_cuda:${GITHUB_REF##*/} . \
+          && docker push yanbc/seam_carving_cuda:${GITHUB_REF##*/} \
+          && docker tag yanbc/seam_carving_cuda:${GITHUB_REF##*/} yanbc/seam_carving_cuda:latest \
+          && docker push yanbc/seam_carving_cuda:latest
+
+      - name: Build and push CPU image
+        id: build-and-push-cpu
+        run: |
+          docker build -f Dockerfile -t yanbc/seam_carving_cpu:${GITHUB_REF##*/} . \
+          && docker push yanbc/seam_carving_cpu:${GITHUB_REF##*/} \
+          && docker tag yanbc/seam_carving_cpu:${GITHUB_REF##*/} yanbc/seam_carving_cpu:latest \
+          && docker push yanbc/seam_carving_cpu:latest
