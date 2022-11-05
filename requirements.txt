@@ -2,3 +2,5 @@ opencv-python
 Flask
 scipy
 numba
+# required for cuda accelaration
+pycuda
