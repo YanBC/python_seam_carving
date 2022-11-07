@@ -12,11 +12,11 @@ Demonstration:
 | demo3 | ![](images/rem.jpeg) (1280x800) | ![](images/rem_resized.jpg) (1000x800) | ![](images/rem_seamcarved.jpg) (1000x800) |
 
 ## How does it work?
-Consider resizing the above image from `1428x968` to `1427x968` for the moment. We first calculate a floating-point score for each pixel in the image. It represents the importance of that pixel as shown below. The brighter the pixel, the more important it is.
+Consider resizing the `mages/Broadway_tower_edit.jpg` from `1428x968` to `1427x968` for the moment. We first calculate a floating-point score for each pixel in the image. It represents the importance of that pixel as shown below. The brighter the pixel, the more important it is.
 
 ![](images/Broadway_tower_enery.jpg)
 
-And then, all we have to do is to find a path or a **seam** from top to bottom which accumulates to the minimum score and remove every pixel along that seam. In this case, it is the highlighted green seam.
+And then, all we have to do is to find a path or a **seam** from top to bottom which accumulates to the minimum score, and remove every pixel along that seam. In this case, it is the highlighted green seam.
 
 ![](images/carve_once.jpg)
 
@@ -26,7 +26,7 @@ Repeat this process a couple of times, we will be able to resize the image from 
 
 As you might have noticed by now, the most important contribution of the seam carving paper is that it provides a way to evaluate the "importance" (called the energy) of each pixel in the image. And since the paper was published, many other evaluation algorithms have been proposed.
 
-In this project, I use the original method of the paper. It is two [Sobel filters](https://en.wikipedia.org/wiki/Sobel_operator), one for the verticle direction, and the other one for the horizontal direction. Together they show how much different a pixel is from the surrounding pixels. The dissimilar the pixel, the higher the energy score.
+In this project, I implement the original method in the paper. It makes use of two [Sobel filters](https://en.wikipedia.org/wiki/Sobel_operator), one for the verticle direction, and the other one for the horizontal direction. Together they show how much different a pixel is from its surrounding pixels. The dissimilar the pixel, the higher the energy score.
 
 One obvious disadvantage of Seam Carving is that it runs insanely slow. On CPU with no optimization, it takes 42 seconds to process one image. That's where CUDA comes in. CUDA enables developers to run general-purpose programs on and harness the great parallel computing power of NVIDIA GPUs. With CUDA acceleration, I was able to reduce the processing time to 0.5 seconds! For more information about my hardware setup please refer to the [Comparison of speed](#comparison-of-speed) section.
 
@@ -52,7 +52,7 @@ and then go to `http://127.0.0.1:10800/` in your favorite browser
 
 
 ## Comparison of speed
-I use Linux `time` program to measure the time consumed. Each version is tested with the following command:
+I use Linux's` time` program to measure the time consumed. Each version is tested with the following command:
 
 ```bash
 time python cml_ui.py images/rem.jpeg -r 400 -c 600
