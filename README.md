@@ -5,10 +5,11 @@ Seam Carving in python, and it comes with a flask application! Original paper: [
 Seam carving is an image processing algorithm for content-aware image resizing. Simply put, it can resize images without distorting important objects.
 
 Demonstration:
-| image | original (1428x968) | resized (968x968)  |
-| --- | --- | --- |
-| simple resize |![](images/Broadway_tower_edit.jpg) | ![](images/Broadway_tower_resized.jpg) |
-| seam carving | ![](images/Broadway_tower_edit.jpg) | ![](images/Broadway_tower_seamcarved.jpg) |
+| image | original  | simple resize   | seam carving |
+| --- | --- | --- | --- |
+| demo1 | ![](images/Broadway_tower_edit.jpg) (1428x968) | ![](images/Broadway_tower_resized.jpg) (968x968) | ![](images/Broadway_tower_seamcarved.jpg) (968x968) |
+| demo2 | ![](images/pietro.jpg) (800x533) | ![](images/pietro_resized.jpg) (400x533) | ![](images/pietro_seamcarved.jpg) (400x533) |
+| demo3 | ![](images/rem.jpeg) (1280x800) | ![](images/rem_resized.jpg) (1000x800) | ![](images/rem_seamcarved.jpg) (1000x800) |
 
 ## How does it work?
 Consider resizing the above image from `1428x968` to `1427x968` for the moment. We first calculate a floating-point score for each pixel in the image. It represents the importance of that pixel as shown below. The brighter the pixel, the more important it is.
