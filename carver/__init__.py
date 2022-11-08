@@ -12,12 +12,6 @@ except ModuleNotFoundError as e:
     print('#@@@@@@@@@@@@@@@@@@@#')
     USE_GPU = False
 if not USE_GPU:
-    try:
-        from carver.carve_numba import Core
-    except ModuleNotFoundError as e:
-        print(e)
-        print('Using slow cpu version seam carving')
-        print('#@@@@@@@@@@@@@@@@@@@#')
         from carver.carve_slow import Core
 
 

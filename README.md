@@ -78,14 +78,7 @@ user    0m1.702s
 sys     0m4.742s
 ```
 
-### CPU fast (numba)
-```
-real    0m10.509s
-user    0m14.076s
-sys     0m9.695s
-```
-
-### CPU slow
+### CPU
 ```
 real    0m42.481s
 user    0m45.133s
