@@ -36,9 +36,11 @@ One obvious disadvantage of Seam Carving is that it runs insanely slow. On CPU w
 python3 -m pip install -r requirements.txt
 # see usage
 python cml_ui.py -h
-# example run
+# resizing with seam carving
 # the result image is save as res.jpg
 python cml_ui.py -r 512 -c 700 images/rem.jpeg
+# object removal with seam carving
+python cml_ui.py image.jpg --protect mask_protect.jpg --remove mask_remove.jpg
 ```
 
 And it comes in flask flavor!

@@ -36,7 +36,7 @@ def backward_energy_opencv(img):
 
 def minimum_seam(energy):
     r, c = energy.shape
-    M = energy.copy()
+    M = energy.astype(np.float32)
 
     backtrack = np.zeros_like(M, dtype=np.int)
 
@@ -62,26 +62,52 @@ def minimum_seam(energy):
     return M, backtrack
 
 
-def carve_column(img):
-    r, c, _ = img.shape
-
-    energy = backward_energy_opencv(img)
-    M, backtrack = minimum_seam(energy)
-    mask = np.ones((r, c), dtype=np.bool)
-
-    j = np.argmin(M[-1])
+def get_keep(min_idx: int, backtrack: np.ndarray) -> np.ndarray:
+    r, _ = backtrack.shape
+    keep = np.ones_like(backtrack, dtype=np.bool)
+    j = min_idx
     for i in reversed(range(r)):
-        mask[i, j] = False
+        keep[i, j] = False
         j = backtrack[i, j]
+    return keep
 
-    mask = np.stack([mask] * 3, axis=2)
-    img = img[mask].reshape((r, c - 1, 3))
-    return img
+
+def cal_keep(energy: np.ndarray) -> np.ndarray:
+    M, backtrack = minimum_seam(energy)
+    min_idx = np.argmin(M[-1])
+    keep = get_keep(min_idx, backtrack)
+    return keep
+
+
+def carve_column(img:np.ndarray, mask_remove:np.ndarray=None, mask_protect:np.ndarray=None):
+
+    _img = img.copy()
+    # watch out for the protected area
+    _mask_protect = mask_protect.astype(np.float32) if mask_protect is not None else None
+    # perform object removal
+    _mask_remove = mask_remove.astype(np.float32) if mask_remove is not None else None
+
+    r, c, _ = img.shape
+    energy = backward_energy_opencv(img)
+    if _mask_remove is not None:
+        energy -= _mask_remove * energy.max() * r
+    if _mask_protect is not None:
+        energy += _mask_protect * energy.max() * r
+    keep = cal_keep(energy)
+
+    keep3d = np.stack([keep] * 3, axis=2)
+    _img = _img[keep3d].reshape((r, c - 1, 3))
+    if _mask_remove is not None:
+        _mask_remove = _mask_remove[keep].reshape((r, c - 1))
+    if _mask_protect is not None:
+        _mask_protect = _mask_protect[keep].reshape((r, c - 1))
+
+    return _img, _mask_remove, _mask_protect
 
 
 class Core:
     def __init__(self) -> None:
         pass
 
-    def carve_column(self, img:np.ndarray) -> np.ndarray:
-        return carve_column(img)
+    def carve_column(self, img:np.ndarray, mask_remove:np.ndarray=None, mask_protect:np.ndarray=None):
+        return carve_column(img, mask_remove, mask_protect)

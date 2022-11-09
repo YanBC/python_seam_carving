@@ -2,7 +2,6 @@ import pycuda.driver as cuda
 from pycuda.compiler import SourceModule
 import numpy as np
 from typing import Tuple
-import cv2 as cv
 import os
 
 
