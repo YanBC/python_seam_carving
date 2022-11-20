@@ -7,9 +7,9 @@ from carver import Engine
 def opts_parser():
     p = argparse.ArgumentParser()
     p.add_argument('src', help='Path to source image')
-    p.add_argument('-c', '--col', type=int, help='Target width to be converted into')
-    p.add_argument('-r', '--row', type=int, help='Target height to be converted into')
-    p.add_argument('--des', default='res.jpg', help='Where to store the resized image')
+    p.add_argument('-c', '--col', type=int, help='Target width')
+    p.add_argument('-r', '--row', type=int, help='Target height')
+    p.add_argument('--des', default='res.jpg', help='Where to store the resized image. Default to res.jpg')
     p.add_argument('--protect', help="Path to the protected mask image file; Providing a protect mask will improve the result since seam carving guarantee not carving anything in the proteced area but it's optional")
     p.add_argument('--remove', help='Path to the removal mask image file; Seam carving will perform object removal and remove all the masked area if this flag is specify')
     return p.parse_args()

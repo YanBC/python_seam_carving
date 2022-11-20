@@ -1,8 +1,13 @@
 import numpy as np
 import cv2 as cv
+from typing import Tuple
 
 
-def backward_energy(img):
+# maximun possible value with backward energy
+_MAX_PIXEL_BACKWARD_ENERGY = 16 * 255
+
+
+def _backward_energy(img):
     from scipy.ndimage.filters import convolve
     filter_du = np.array([
         [-1.0, -2.0, -1.0],
@@ -23,7 +28,7 @@ def backward_energy(img):
     return grads
 
 
-def backward_energy_opencv(img):
+def _backward_energy_opencv(img):
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
     grads_x = cv.Sobel(gray, cv.CV_64F, 1, 0, ksize=3)
@@ -34,7 +39,7 @@ def backward_energy_opencv(img):
     return grads
 
 
-def minimum_seam(energy):
+def _minimum_seam(energy):
     r, c = energy.shape
     M = energy.astype(np.float32)
 
@@ -62,7 +67,7 @@ def minimum_seam(energy):
     return M, backtrack
 
 
-def get_keep(min_idx: int, backtrack: np.ndarray) -> np.ndarray:
+def _get_keep(min_idx: int, backtrack: np.ndarray) -> np.ndarray:
     r, _ = backtrack.shape
     keep = np.ones_like(backtrack, dtype=np.bool)
     j = min_idx
@@ -72,14 +77,7 @@ def get_keep(min_idx: int, backtrack: np.ndarray) -> np.ndarray:
     return keep
 
 
-def cal_keep(energy: np.ndarray) -> np.ndarray:
-    M, backtrack = minimum_seam(energy)
-    min_idx = np.argmin(M[-1])
-    keep = get_keep(min_idx, backtrack)
-    return keep
-
-
-def carve_column(img:np.ndarray, mask_remove:np.ndarray=None, mask_protect:np.ndarray=None):
+def carve_column(img:np.ndarray, mask_remove:np.ndarray=None, mask_protect:np.ndarray=None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     _img = img.copy()
     # watch out for the protected area
@@ -88,15 +86,17 @@ def carve_column(img:np.ndarray, mask_remove:np.ndarray=None, mask_protect:np.nd
     _mask_remove = mask_remove.astype(np.float32) if mask_remove is not None else None
 
     r, c, _ = img.shape
-    energy = backward_energy_opencv(img)
+    energy = _backward_energy_opencv(img)
     if _mask_remove is not None:
-        energy -= _mask_remove * energy.max() * r
+        energy -= _mask_remove * _MAX_PIXEL_BACKWARD_ENERGY * r
     if _mask_protect is not None:
-        energy += _mask_protect * energy.max() * r
-    keep = cal_keep(energy)
+        energy += _mask_protect * _MAX_PIXEL_BACKWARD_ENERGY * r
+    M, backtrack = _minimum_seam(energy)
+    min_idx = np.argmin(M[-1])
+    keep = _get_keep(min_idx, backtrack)
 
-    keep3d = np.stack([keep] * 3, axis=2)
-    _img = _img[keep3d].reshape((r, c - 1, 3))
+    keep3c = np.stack([keep] * 3, axis=2)
+    _img = _img[keep3c].reshape((r, c - 1, 3))
     if _mask_remove is not None:
         _mask_remove = _mask_remove[keep].reshape((r, c - 1))
     if _mask_protect is not None:
@@ -109,5 +109,6 @@ class Core:
     def __init__(self) -> None:
         pass
 
-    def carve_column(self, img:np.ndarray, mask_remove:np.ndarray=None, mask_protect:np.ndarray=None):
-        return carve_column(img, mask_remove, mask_protect)
+    def carve_column(self, img:np.ndarray, mask_remove:np.ndarray=None, mask_protect:np.ndarray=None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        _img, _mask_remove, _mask_protect = carve_column(img, mask_remove, mask_protect)
+        return _img, _mask_remove, _mask_protect

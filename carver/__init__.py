@@ -65,20 +65,20 @@ class Engine():
         if mask_protect is not None:
             mask_protect = prepare_mask(mask_protect)
 
-        count = 0
+        # count = 0
         if mask_protect is None:
             while np.any(mask_remove > 0):
                 img, mask_remove, mask_protect = self.core.carve_column(img, mask_remove, mask_protect)
-                count += 1
-                print(count)
+                # count += 1
+                # print(count)
         else:
             curr_mask_sum = mask_remove.sum()
             past_mask_sum = np.inf
             while curr_mask_sum < past_mask_sum:
                 img, mask_remove, mask_protect = self.core.carve_column(img, mask_remove, mask_protect)
                 past_mask_sum, curr_mask_sum = curr_mask_sum, mask_remove.sum()
-                count += 1
-                print(count)
+                # count += 1
+                # print(count)
 
         return img
 
