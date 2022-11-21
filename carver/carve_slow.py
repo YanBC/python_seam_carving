@@ -4,7 +4,7 @@ from typing import Tuple
 
 
 # maximun possible value with backward energy
-_MAX_PIXEL_BACKWARD_ENERGY = 16 * 255
+_MAX_PIXEL_BACKWARD_ENERGY = 8 * 255 * 2
 
 
 def _backward_energy(img):

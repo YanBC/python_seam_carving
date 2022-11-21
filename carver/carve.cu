@@ -46,7 +46,8 @@ __global__ void sobel_abs(float *g_odata, float *g_idata, int width, int height)
         }
     }
 
-    g_odata[index] = sqrt(value_x * value_x + value_y * value_y);
+    // g_odata[index] = sqrt(value_x * value_x + value_y * value_y);
+    g_odata[index] = fabsf(value_x) + fabsf(value_y);
 }
 
 
@@ -93,4 +94,14 @@ __global__ void min_energy_at_row(float *energy_m, int *backtrack_m, int width, 
 __global__ void get_min_index(float *energy_m, int *index, int width, int height) {
     int offset = width * (height - 1);
     *index = arg_min(energy_m + offset, width);
+}
+
+
+__global__ void add_mask_by_factor(float *energy_m, float *mask, float factor, int width, int height) {
+    int des_x = blockIdx.x * blockDim.x + threadIdx.x;
+    int des_y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (des_x >= width || des_y >= height)
+        return;
+    int des_id = des_y * width + des_x;
+    energy_m[des_id] += mask[des_id] * factor;
 }
