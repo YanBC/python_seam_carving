@@ -17,10 +17,10 @@ RUN apt-get update && \
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 WORKDIR /seam_carving
-COPY ./requirements.txt .
+COPY ./requirements.txt ./requirements-cuda.txt ./
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install -r requirements.txt && \
-    python3 -m pip install pycuda
+    python3 -m pip install -r requirements-cuda.txt
 
 RUN useradd -m -s /bin/bash -u $USERID -G sudo carver && \
     echo "carver:carver" | chpasswd

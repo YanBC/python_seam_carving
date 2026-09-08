@@ -34,6 +34,9 @@ One obvious disadvantage of Seam Carving is that it runs insanely slow. On CPU w
 ```bash
 # install python packages
 python3 -m pip install -r requirements.txt
+# optional: CUDA acceleration, needs the CUDA toolkit installed.
+# without it the carver falls back to the CPU implementation automatically.
+python3 -m pip install -r requirements-cuda.txt
 # see usage
 python cml_ui.py -h
 # resizing with seam carving

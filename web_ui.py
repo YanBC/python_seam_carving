@@ -8,7 +8,7 @@ import cv2 as cv
 from carver import Engine
 
 
-DEFAULT_ADDR = os.environ['HOSTNAME']
+DEFAULT_ADDR = os.environ.get('HOSTNAME', '127.0.0.1')
 DEFAULT_PORT = 10800
 UPLOAD_FOLDER = './uploads'
 IMAGE_FOLDER = './results'
@@ -41,7 +41,7 @@ def upload_file():
         target_height = int(request.form['height'])
         image = cv.imread(srcPath)
 
-        output = carver.run(image, target_width, target_height)
+        output = carver.resize(image, target_width, target_height)
 
         if output is not None:
             desPath = os.path.join(app.config['IMAGE_FOLDER'], filename)

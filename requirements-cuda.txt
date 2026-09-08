@@ -1,0 +1,8 @@
+# Optional: CUDA acceleration. Needs the CUDA toolkit (nvcc) already installed.
+# Without this the carver falls back to the CPU implementation automatically.
+#
+# Releases from 2023 onwards use `str | Sequence[str]` annotations that require
+# Python 3.10+, so older interpreters (e.g. JetPack 5.x ships Python 3.8) need
+# the last release that still supports them.
+pycuda; python_version >= "3.10"
+pycuda==2022.1; python_version < "3.10"

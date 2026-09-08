@@ -12,6 +12,7 @@ implementation — behind one `Engine` API. Also ships a small Flask front-end.
 
 ```bash
 python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements-cuda.txt   # optional, needs CUDA toolkit
 
 # resize (writes res.jpg by default)
 python cml_ui.py -r 512 -c 700 images/rem.jpeg
@@ -22,7 +23,7 @@ python cml_ui.py image.jpg --protect mask_protect.jpg --remove mask_remove.jpg
 # interactive mask drawing (OpenCV window; draw, ESC to exit, writes mask.jpg)
 python scripts/draw_mask.py images/rem.jpeg
 
-# flask app on :10800 — requires HOSTNAME to be exported (see Gotchas)
+# flask app on :10800 (binds 127.0.0.1 unless HOSTNAME is set or --ip is given)
 python web_ui.py --ip 0.0.0.0
 
 # docker images (build from repo root)
@@ -75,16 +76,17 @@ the actual pixel deletion stay on the CPU in both backends.
 
 ## Gotchas
 
-- `carve_slow.py` and `carve_cuda.py` use `np.int` / `np.bool`, removed in NumPy 1.24.
-  This code needs `numpy < 1.24`; `requirements.txt` does not pin it.
-- `web_ui.py` is stale: it calls `carver.run(...)`, which no longer exists on `Engine`
-  (use `resize`), and reads `os.environ['HOSTNAME']` at import, which raises `KeyError`
-  on most shells unless you `export HOSTNAME=...`.
-- `scripts/create_gif.py` imports `minimum_seam` / `backward_energy_opencv` from
-  `carve_slow`, which were renamed with a leading underscore.
-- `scripts/make_image.sh` and the GitHub workflow expect `Dockerfile` and
-  `cuda.Dockerfile` at the repo root, but the only Dockerfile lives at
-  `scripts/Dockerfile` (it is the CUDA one; base image is overridable via `--build-arg BASE`).
-- `numba` is still in `requirements.txt` but unused since commit `20cdcdc`.
 - The CUDA backend casts the image to `float32` and returns it as `float32`;
   `cv.imwrite` still handles it, but downstream code should not assume `uint8`.
+- `pycuda` lives in `requirements-cuda.txt`, not `requirements.txt`, because installing it
+  needs the CUDA toolkit and would break a plain CPU install. It is pinned to `2022.1` on
+  Python < 3.10 (newer releases use `str | Sequence[str]` annotations needing 3.10+), which
+  is what JetPack 5.x boards require. `pycuda` also imports `numpy.typing`, so it needs
+  `numpy >= 1.20`.
+- Two Dockerfiles at the repo root: `Dockerfile` (CPU, `python:3.11-slim`) and
+  `cuda.Dockerfile` (GPU, `nvcr.io/nvidia/cuda` base, overridable via `--build-arg BASE`).
+  `scripts/make_image.sh` and the release workflow both build from the root context and
+  reference these names. `cuda.Dockerfile` has no arm64 base image, so it cannot be built
+  on an Apple Silicon machine — only CI or an amd64 host.
+- `scripts/create_gif.py` is mostly commented out and imports `webp`, which is in neither
+  requirements file.

@@ -43,7 +43,7 @@ class Core:
 
     def _get_keep(self, min_idx: int, backtrack: np.ndarray) -> np.ndarray:
         r, _ = backtrack.shape
-        keep = np.ones_like(backtrack, dtype=np.bool)
+        keep = np.ones_like(backtrack, dtype=bool)
         j = min_idx
         for i in reversed(range(r)):
             keep[i, j] = False

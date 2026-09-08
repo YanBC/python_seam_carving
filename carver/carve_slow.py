@@ -43,7 +43,7 @@ def _minimum_seam(energy):
     r, c = energy.shape
     M = energy.astype(np.float32)
 
-    backtrack = np.zeros_like(M, dtype=np.int)
+    backtrack = np.zeros_like(M, dtype=int)
 
     for i in range(1, r):
         pre_i = i - 1
@@ -69,7 +69,7 @@ def _minimum_seam(energy):
 
 def _get_keep(min_idx: int, backtrack: np.ndarray) -> np.ndarray:
     r, _ = backtrack.shape
-    keep = np.ones_like(backtrack, dtype=np.bool)
+    keep = np.ones_like(backtrack, dtype=bool)
     j = min_idx
     for i in reversed(range(r)):
         keep[i, j] = False

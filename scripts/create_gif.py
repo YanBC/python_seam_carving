@@ -4,7 +4,7 @@ import os
 import numpy as np
 from typing import List
 
-from carver.carve_slow import minimum_seam, backward_energy_opencv
+from carver.carve_slow import _minimum_seam, _backward_energy_opencv
 
 
 def generate_webp(file_path: str, images: List[np.ndarray], max_size: int = 600) -> None:
