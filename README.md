@@ -65,6 +65,10 @@ My hardware setup:
 - GPU: `NVIDIA GeForce RTX 3080 Ti`
 - another GPU: `NVIDIA GeForce RTX 3090`
 
+I also tested an embedded board:
+- `NVIDIA Jetson AGX Orin Developer Kit` (JetPack 5.1.2 / L4T R35.4.1, CUDA 11.4), 8-core
+  ARM Cortex-A78AE CPU and a 14-SM Ampere GPU (compute capability 8.7), power mode `MAXN`
+
 Results:
 ### GPU (3090)
 ```
@@ -86,3 +90,27 @@ real    0m42.481s
 user    0m45.133s
 sys     0m4.929s
 ```
+
+### GPU (Jetson AGX Orin)
+```
+real    0m1.059s
+user    0m1.039s
+sys     0m0.204s
+```
+
+### CPU (Jetson AGX Orin)
+```
+real    0m38.174s
+user    0m44.904s
+sys     0m51.366s
+```
+
+The two Orin numbers are the median of 3 consecutive runs; the spread was under 80ms in
+both cases (GPU 1.037-1.084s, CPU 38.155-38.230s). So even on an embedded board the CUDA
+backend is about 36x faster than the CPU one.
+
+Note that the Orin ships with Python 3.8 and NumPy 1.17, and the versions on PyPI today do
+not work with it out of the box. The combination that builds and runs is `pycuda==2022.1`
+(newer releases use `str | Sequence[str]` annotations that need Python 3.10+) together with
+`numpy==1.23.5` (pycuda needs `numpy.typing`, added in 1.20, while this project still uses
+`np.bool`/`np.int`, removed in 1.24).
